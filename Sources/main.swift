@@ -9,9 +9,15 @@ import PerfectSessionMySQL
 let server = HTTPServer()
 
 SessionConfig.name = "TestingMySQLDrivers"
-SessionConfig.idle = 10
+SessionConfig.idle = 60
+
+// Optional
+SessionConfig.cookieDomain = "localhost"
+SessionConfig.IPAddressLock = true
+SessionConfig.userAgentLock = true
 
 MySQLSessionConnector.host = "localhost"
+MySQLSessionConnector.port = 3306
 MySQLSessionConnector.username = "perfect"
 MySQLSessionConnector.password = "perfect"
 MySQLSessionConnector.database = "perfect_testing"
