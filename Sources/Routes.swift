@@ -13,6 +13,9 @@ public func makeWebDemoRoutes() -> Routes {
 	var routes = Routes()
 
 	routes.add(method: .get, uri: "/", handler: WebHandlers.indexHandlerGet)
+	routes.add(method: .get, uri: "/nocsrf", handler: WebHandlers.formNoCSRF)
+	routes.add(method: .get, uri: "/withcsrf", handler: WebHandlers.formWithCSRF)
+	routes.add(method: .post, uris: ["/nocsrf", "/withcsrf"], handler: WebHandlers.formReceive)
 
 	return routes
 }
