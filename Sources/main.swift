@@ -34,6 +34,12 @@ SessionConfig.idle = 60
 SessionConfig.cookieDomain = "localhost"
 SessionConfig.IPAddressLock = true
 SessionConfig.userAgentLock = true
+SessionConfig.CSRF.checkState = true
+
+SessionConfig.CORS.enabled = true
+SessionConfig.CORS.acceptableHostnames.append("http://www.test-cors.org")
+//SessionConfig.CORS.acceptableHostnames.append("*.test-cors.org")
+SessionConfig.CORS.maxAge = 60
 
 MySQLSessionConnector.host = "localhost"
 MySQLSessionConnector.port = 3306
