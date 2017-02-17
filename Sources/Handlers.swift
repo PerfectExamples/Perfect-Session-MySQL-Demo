@@ -19,20 +19,28 @@ public class WebHandlers {
 	open static func indexHandlerGet(request: HTTPRequest, _ response: HTTPResponse) {
 
 		let rand = URandom()
-
-		request.session.data[rand.secureToken] = rand.secureToken
-//		print(request.session.data)
-		var dump = ""
-		do {
-			dump = try request.session.data.jsonEncodedString()
-		} catch {
-			dump = "\(error)"
-		}
-		var body = "<p>Your Session ID is: <code>\(request.session.token)</code></p><p>Session data: <code>\(dump)</code></p>"
-		body += "<p><a href=\"/withcsrf\">CSRF Test Form</a></p>"
-		body += "<p><a href=\"/nocsrf\">No CSRF Test Form</a></p>"
-
-		response.setBody(string: header+body+footer)
+        var body = ""
+        
+        if var session = request.session {
+            
+            session.data[rand.secureToken] = rand.secureToken
+            //		print(request.session.data)
+            var dump = ""
+            do {
+                dump = try session.data.jsonEncodedString()
+            } catch {
+                dump = "\(error)"
+            }
+            
+            body = "<p>Your Session ID is: <code>\(session.token)</code></p><p>Session data: <code>\(dump)</code></p>"
+            body += "<p><a href=\"/withcsrf\">CSRF Test Form</a></p>"
+            body += "<p><a href=\"/nocsrf\">No CSRF Test Form</a></p>"
+            
+        } else {
+            body = "<p>No Session was found</p>"
+        }
+        
+        response.setBody(string: header+body+footer)
 		response.completed()
 
 
@@ -45,7 +53,7 @@ public class WebHandlers {
 	open static func CORSHandlerGet(request: HTTPRequest, _ response: HTTPResponse) {
 
 		response.addHeader(.contentType, value: "application/json")
-		try? response.setBody(json: ["Success":"CORS Request"])
+		_ = try? response.setBody(json: ["Success":"CORS Request"])
 		response.completed()
 
 	}
@@ -57,13 +65,21 @@ public class WebHandlers {
 	================================================================================================================= */
 	open static func formNoCSRF(request: HTTPRequest, _ response: HTTPResponse) {
 
-		var body = "<p>Your Session ID is: <code>\(request.session.token)</code></p><form method=\"POST\" action=\"?\" enctype=\"multipart/form-data\">"
-		body += "<p>No CSRF Form</p>"
-		body += "<p>NOTE: You should get a failed request because there is no CSRF</p>"
-		body += "<p><input type=\"text\" name=\"testing\" value=\"testing123\"></p>"
-		body += "<p><input type=\"submit\" name=\"submit\" value=\"submit\"></p>"
-		body += "</form>"
-		response.setBody(string: header+body+footer)
+        var body = ""
+        
+        if let session = request.session {
+            body = "<p>Your Session ID is: <code>\(session.token)</code></p><form method=\"POST\" action=\"?\" enctype=\"multipart/form-data\">"
+            body += "<p>No CSRF Form</p>"
+            body += "<p>NOTE: You should get a failed request because there is no CSRF</p>"
+            body += "<p><input type=\"text\" name=\"testing\" value=\"testing123\"></p>"
+            body += "<p><input type=\"submit\" name=\"submit\" value=\"submit\"></p>"
+            body += "</form>"
+            response.setBody(string: header+body+footer)
+        } else {
+            body = "<p>No Session was found</p>"
+        }
+
+        response.setBody(string: header+body+footer)
 		response.completed()
 
 	}
@@ -72,14 +88,22 @@ public class WebHandlers {
 	formWithCSRF
 	================================================================================================================= */
 	open static func formWithCSRF(request: HTTPRequest, _ response: HTTPResponse) {
-		let t = request.session.data["csrf"] as? String ?? ""
-		var body = "<p>Your Session ID is: <code>\(request.session.token)</code></p><form method=\"POST\" action=\"?\" enctype=\"multipart/form-data\">"
-		body += "<p>CSRF Form</p>"
-		body += "<p><input type=\"text\" name=\"testing\" value=\"testing123\"></p>"
-		body += "<p><input type=\"text\" name=\"_csrf\" value=\"\(t)\"></p>"
-		body += "<p><input type=\"submit\" name=\"submit\" value=\"submit\"></p>"
-		body += "</form>"
-		response.setBody(string: header+body+footer)
+        
+        var body = ""
+        
+        if let session = request.session {
+            let t = session.data["csrf"] as? String ?? ""
+            body = "<p>Your Session ID is: <code>\(session.token)</code></p><form method=\"POST\" action=\"?\" enctype=\"multipart/form-data\">"
+            body += "<p>CSRF Form</p>"
+            body += "<p><input type=\"text\" name=\"testing\" value=\"testing123\"></p>"
+            body += "<p><input type=\"text\" name=\"_csrf\" value=\"\(t)\"></p>"
+            body += "<p><input type=\"submit\" name=\"submit\" value=\"submit\"></p>"
+            body += "</form>"
+        } else {
+            body = "<p>No Session was found</p>"
+        }
+        
+        response.setBody(string: header+body+footer)
 		response.completed()
 
 	}
@@ -89,10 +113,17 @@ public class WebHandlers {
 	================================================================================================================= */
 	open static func formReceive(request: HTTPRequest, _ response: HTTPResponse) {
 		//		print("in formReceive")
-		var body = "<p>Your Session ID is: <code>\(request.session.token)</code></p>"
-		body += "<p>CSRF Test response</p>"
-		body += "<p>Params: \(request.postParams)</p>"
-		response.setBody(string: header+body+footer)
+        var body = ""
+        
+        if let session = request.session {
+            body = "<p>Your Session ID is: <code>\(session.token)</code></p>"
+            body += "<p>CSRF Test response</p>"
+            body += "<p>Params: \(request.postParams)</p>"
+        } else {
+            body = "<p>No Session was found</p>"
+        }
+        
+        response.setBody(string: header+body+footer)
 		response.completed()
 		
 	}
