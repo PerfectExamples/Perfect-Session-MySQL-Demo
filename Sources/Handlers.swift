@@ -10,7 +10,6 @@
 import PerfectLib
 import PerfectHTTP
 import PerfectSession
-import TurnstileCrypto
 
 public class WebHandlers {
 	/* =================================================================================================================
@@ -18,17 +17,13 @@ public class WebHandlers {
 	================================================================================================================= */
 	open static func indexHandlerGet(request: HTTPRequest, _ response: HTTPResponse) {
 
-		let rand = URandom()
-
-		request.session.data[rand.secureToken] = rand.secureToken
-//		print(request.session.data)
 		var dump = ""
 		do {
-			dump = try request.session.data.jsonEncodedString()
+			dump = (try request.session?.data.jsonEncodedString()) ?? ""
 		} catch {
 			dump = "\(error)"
 		}
-		var body = "<p>Your Session ID is: <code>\(request.session.token)</code></p><p>Session data: <code>\(dump)</code></p>"
+		var body = "<p>Your Session ID is: <code>\(request.session?.token ?? "")</code></p><p>Session data: <code>\(dump)</code></p>"
 		body += "<p><a href=\"/withcsrf\">CSRF Test Form</a></p>"
 		body += "<p><a href=\"/nocsrf\">No CSRF Test Form</a></p>"
 
@@ -45,7 +40,7 @@ public class WebHandlers {
 	open static func CORSHandlerGet(request: HTTPRequest, _ response: HTTPResponse) {
 
 		response.addHeader(.contentType, value: "application/json")
-		try? response.setBody(json: ["Success":"CORS Request"])
+		let _ = try? response.setBody(json: ["Success":"CORS Request"])
 		response.completed()
 
 	}
@@ -57,7 +52,7 @@ public class WebHandlers {
 	================================================================================================================= */
 	open static func formNoCSRF(request: HTTPRequest, _ response: HTTPResponse) {
 
-		var body = "<p>Your Session ID is: <code>\(request.session.token)</code></p><form method=\"POST\" action=\"?\" enctype=\"multipart/form-data\">"
+		var body = "<p>Your Session ID is: <code>\(request.session?.token ?? "")</code></p><form method=\"POST\" action=\"?\" enctype=\"multipart/form-data\">"
 		body += "<p>No CSRF Form</p>"
 		body += "<p>NOTE: You should get a failed request because there is no CSRF</p>"
 		body += "<p><input type=\"text\" name=\"testing\" value=\"testing123\"></p>"
@@ -72,8 +67,8 @@ public class WebHandlers {
 	formWithCSRF
 	================================================================================================================= */
 	open static func formWithCSRF(request: HTTPRequest, _ response: HTTPResponse) {
-		let t = request.session.data["csrf"] as? String ?? ""
-		var body = "<p>Your Session ID is: <code>\(request.session.token)</code></p><form method=\"POST\" action=\"?\" enctype=\"multipart/form-data\">"
+		let t = request.session?.data["csrf"] as? String ?? ""
+		var body = "<p>Your Session ID is: <code>\(request.session?.token ?? "")</code></p><form method=\"POST\" action=\"?\" enctype=\"multipart/form-data\">"
 		body += "<p>CSRF Form</p>"
 		body += "<p><input type=\"text\" name=\"testing\" value=\"testing123\"></p>"
 		body += "<p><input type=\"text\" name=\"_csrf\" value=\"\(t)\"></p>"
@@ -89,7 +84,7 @@ public class WebHandlers {
 	================================================================================================================= */
 	open static func formReceive(request: HTTPRequest, _ response: HTTPResponse) {
 		//		print("in formReceive")
-		var body = "<p>Your Session ID is: <code>\(request.session.token)</code></p>"
+		var body = "<p>Your Session ID is: <code>\(request.session?.token ?? "")</code></p>"
 		body += "<p>CSRF Test response</p>"
 		body += "<p>Params: \(request.postParams)</p>"
 		response.setBody(string: header+body+footer)
