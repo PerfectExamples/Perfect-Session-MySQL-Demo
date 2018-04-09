@@ -41,7 +41,7 @@ SessionConfig.CORS.acceptableHostnames.append("http://www.test-cors.org")
 //SessionConfig.CORS.acceptableHostnames.append("*.test-cors.org")
 SessionConfig.CORS.maxAge = 60
 
-MySQLSessionConnector.host = "localhost"
+MySQLSessionConnector.host = "127.0.0.1"
 MySQLSessionConnector.port = 3306
 MySQLSessionConnector.username = "perfect"
 MySQLSessionConnector.password = "perfect"
@@ -55,6 +55,8 @@ server.setResponseFilters([sessionDriver.responseFilter])
 
 server.addRoutes(makeWebDemoRoutes())
 server.serverPort = 8181
+
+AuthFilter.authenticationConfig.include("*")
 
 do {
 	// Launch the HTTP server.
